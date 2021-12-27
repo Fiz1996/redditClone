@@ -1,0 +1,20 @@
+spring:
+  jpa:
+    show-sql: true
+  hibernate:
+    ddl-auto: ${DDL_TYPE:update}
+  datasource:
+    name: ${DATABASE_NAME:test}
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5433/test}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD:123456}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 100
+      leak-detection-threshold: 60000
+      idle-timeout: 30000
+      minimum-idle: 5
+
+logging:
+  level:
+    root: info
