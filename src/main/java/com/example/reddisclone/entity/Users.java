@@ -1,7 +1,6 @@
 package com.example.reddisclone.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,13 +19,12 @@ import static javax.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Builder
-public class User {
+public class Users {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long userId;
     @NotBlank(message = "Username is required")
-    private String usernmae;
+    private String username;
     @NotBlank(message = "Password is required")
     private String password;
     @Email

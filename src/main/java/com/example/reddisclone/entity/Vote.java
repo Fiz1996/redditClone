@@ -19,13 +19,13 @@ import static javax.persistence.GenerationType.IDENTITY;
 public class Vote {
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    private Long id;
+    private Long voteId;
     private VoteType voteType;
     @NotNull
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "postId",referencedColumnName = "postId")
+    @JoinColumn(name = "postId", referencedColumnName = "postId")
     private Post post;
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "userId",referencedColumnName = "userId")
-    private User user;
+    @JoinColumn(name = "userId", referencedColumnName = "userId")
+    private Users users;
 }
