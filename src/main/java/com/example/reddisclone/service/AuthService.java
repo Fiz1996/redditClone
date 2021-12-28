@@ -4,12 +4,16 @@ import com.example.reddisclone.dto.RegisterRequest;
 import com.example.reddisclone.entity.NotificationEmail;
 import com.example.reddisclone.entity.Users;
 import com.example.reddisclone.entity.VerificationToken;
+import com.example.reddisclone.exception.RedditCloneExcption;
 import com.example.reddisclone.repository.UserRepository;
 import com.example.reddisclone.repository.VerificationTokenRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotBlank;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -48,6 +52,19 @@ public class AuthService {
         verificationToken.setUsers(users);
         verificationTokenRepository.save(verificationToken);
         return token;
+    }
 
+    public void verifyAccount(String token) {
+        Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
+        verificationToken.orElseThrow(()-> new RedditCloneExcption("Invalid token"));
+        fetchUserAndEnable(verificationToken.get());
+    }
+//    @Transactional
+   private void fetchUserAndEnable(VerificationToken verificationToken) {
+        @NotBlank(message = "Username is required")
+        String username = verificationToken.getUsers().getUsername();
+        Users user = userRepository.findByUsername(username).orElseThrow(() -> new RedditCloneExcption("User not found with name " + username));
+        user.setEnabled(true);
+        userRepository.save(user);
     }
 }
