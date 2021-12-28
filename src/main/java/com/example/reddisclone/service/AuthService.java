@@ -1,5 +1,7 @@
 package com.example.reddisclone.service;
 
+import com.example.reddisclone.dto.AuthenticationResponse;
+import com.example.reddisclone.dto.LoginRequest;
 import com.example.reddisclone.dto.RegisterRequest;
 import com.example.reddisclone.entity.NotificationEmail;
 import com.example.reddisclone.entity.Users;
@@ -7,10 +9,13 @@ import com.example.reddisclone.entity.VerificationToken;
 import com.example.reddisclone.exception.RedditCloneExcption;
 import com.example.reddisclone.repository.UserRepository;
 import com.example.reddisclone.repository.VerificationTokenRepository;
+import com.example.reddisclone.security.JwtProvider;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import javax.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.Optional;
@@ -24,12 +29,16 @@ public class AuthService {
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final MailService mailService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
 
-    public AuthService(PasswordEncoder passwordEncoder, UserRepository userRepository, VerificationTokenRepository verificationTokenRepository, MailService mailService) {
+    public AuthService(PasswordEncoder passwordEncoder, UserRepository userRepository, VerificationTokenRepository verificationTokenRepository, MailService mailService, AuthenticationManager authenticationManager, JwtProvider jwtProvider) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.verificationTokenRepository = verificationTokenRepository;
         this.mailService = mailService;
+        this.authenticationManager = authenticationManager;
+        this.jwtProvider = jwtProvider;
     }
 //    @Transactional
     public void signup(RegisterRequest registerRequest) {
@@ -66,5 +75,13 @@ public class AuthService {
         Users user = userRepository.findByUsername(username).orElseThrow(() -> new RedditCloneExcption("User not found with name " + username));
         user.setEnabled(true);
         userRepository.save(user);
+    }
+
+    public AuthenticationResponse login(LoginRequest loginRequest) {
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername()
+                , loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+        String token = jwtProvider.generateToken(authenticate);
+        return new AuthenticationResponse(token,loginRequest.getUsername());
     }
 }
